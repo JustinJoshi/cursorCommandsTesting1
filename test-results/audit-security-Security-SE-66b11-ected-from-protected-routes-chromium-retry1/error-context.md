@@ -1,0 +1,80 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [active]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - navigation [ref=e7]:
+            - button "previous" [disabled] [ref=e8]:
+              - img "previous" [ref=e9]
+            - generic [ref=e11]:
+              - generic [ref=e12]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e13]:
+              - img "next" [ref=e14]
+          - img
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - img [ref=e18]
+            - generic "Latest available version is detected (16.1.6)." [ref=e20]: Next.js 16.1.6
+            - generic [ref=e21]: Turbopack
+          - img
+      - dialog "Runtime Error" [ref=e23]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e30]: Runtime Error
+              - generic [ref=e31]:
+                - button "Copy Error Info" [ref=e32] [cursor=pointer]:
+                  - img [ref=e33]
+                - button "No related documentation found" [disabled] [ref=e35]:
+                  - img [ref=e36]
+                - button "Attach Node.js inspector" [ref=e38] [cursor=pointer]:
+                  - img [ref=e39]
+            - generic [ref=e48]: "[CONVEX Q(teams:list)] [Request ID: 14e33f7be564134f] Server Error Could not find public function for 'teams:list'. Did you forget to run `npx convex dev` or `npx convex deploy`? Called by client"
+          - generic [ref=e49]:
+            - generic [ref=e50]:
+              - paragraph [ref=e52]:
+                - img [ref=e54]
+                - generic [ref=e57]: src/app/dashboard/page.tsx (11:25) @ DashboardPage
+                - button "Open in editor" [ref=e58] [cursor=pointer]:
+                  - img [ref=e60]
+              - generic [ref=e63]:
+                - generic [ref=e64]: 9 |
+                - generic [ref=e65]: "10 | export default function DashboardPage() {"
+                - generic [ref=e66]: "> 11 | const teams = useQuery(api.teams.list);"
+                - generic [ref=e67]: "| ^"
+                - generic [ref=e68]: 12 |
+                - generic [ref=e69]: 13 | return (
+                - generic [ref=e70]: 14 | <div className="max-w-6xl mx-auto px-4 py-8">
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - paragraph [ref=e73]:
+                  - text: Call Stack
+                  - generic [ref=e74]: "28"
+                - button "Show 27 ignore-listed frame(s)" [ref=e75] [cursor=pointer]:
+                  - text: Show 27 ignore-listed frame(s)
+                  - img [ref=e76]
+              - generic [ref=e78]:
+                - generic [ref=e79]:
+                  - text: DashboardPage
+                  - button "Open DashboardPage in editor" [ref=e80] [cursor=pointer]:
+                    - img [ref=e81]
+                - text: src/app/dashboard/page.tsx (11:25)
+        - generic [ref=e83]: "1"
+        - generic [ref=e84]: "2"
+    - generic [ref=e89] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e90]:
+        - img [ref=e91]
+      - generic [ref=e94]:
+        - button "Open issues overlay" [ref=e95]:
+          - generic [ref=e96]:
+            - generic [ref=e97]: "0"
+            - generic [ref=e98]: "1"
+          - generic [ref=e99]: Issue
+        - button "Collapse issues badge" [ref=e100]:
+          - img [ref=e101]
+  - 'heading "Application error: a client-side exception has occurred while loading localhost (see the browser console for more information)." [level=2] [ref=e105]'
+```

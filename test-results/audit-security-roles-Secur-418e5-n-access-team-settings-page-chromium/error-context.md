@@ -1,0 +1,54 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - img [ref=e5]
+        - link "DocVault" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+      - navigation [ref=e9]:
+        - link "Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /dashboard
+      - button "Open user menu" [ref=e13] [cursor=pointer]:
+        - img "j j's logo" [ref=e16]
+  - main [ref=e18]:
+    - generic [ref=e19]:
+      - link "Back to Dashboard" [ref=e20] [cursor=pointer]:
+        - /url: /dashboard
+        - img
+        - text: Back to Dashboard
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - img [ref=e25]
+            - generic [ref=e30]: Create a New Team
+          - generic [ref=e31]: Teams let you organize documents and collaborate with others. You will be the team admin.
+        - generic [ref=e32]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: Team Name
+            - textbox "Team Name" [ref=e36]:
+              - /placeholder: e.g. Engineering, Marketing, Legal...
+              - text: qa-team-1771649617257-824
+          - button "Create Team" [ref=e38]
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e39]:
+        - img [ref=e41]
+        - generic [ref=e46]: "[CONVEX M(teams:create)] [Request ID: efd0232f0378c244] Server Error Could not find public function for 'teams:create'. Did you forget to run `npx convex dev` or `npx convex deploy`? Called by client"
+  - generic [ref=e51] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e52]:
+      - img [ref=e53]
+    - generic [ref=e56]:
+      - button "Open issues overlay" [ref=e57]:
+        - generic [ref=e58]:
+          - generic [ref=e59]: "3"
+          - generic [ref=e60]: "4"
+        - generic [ref=e61]:
+          - text: Issue
+          - generic [ref=e62]: s
+      - button "Collapse issues badge" [ref=e63]:
+        - img [ref=e64]
+  - alert [ref=e66]
+```
