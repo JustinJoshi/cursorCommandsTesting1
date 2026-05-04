@@ -1,139 +1,195 @@
-# DocVault
+# Prius Price Tracker
 
-A full-stack document management application with version control, team collaboration, and role-based access control.
+A local web application that compares Toyota Prius prices from Facebook Marketplace using screen capture and a local AI vision model (Qwen2.5-VL-7B). Access the dashboard from your phone via Tailscale.
 
-## Tech Stack
+## How It Works
 
-- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui
-- **Backend:** Convex (real-time database, serverless functions, file storage)
-- **Auth:** Clerk (hosted authentication)
-- **Storage:** Convex file storage
+1. Open Facebook Marketplace in your browser and search "Toyota Prius"
+2. Press a hotkey or tap "Capture" in the mobile web UI
+3. The app screenshots your display and sends it to a local Qwen2.5-VL model
+4. The AI extracts listing data: price, year, model, description
+5. Each listing gets an AI-generated deal quality assessment
+6. Browse results in a mobile-friendly dashboard from your phone
 
-## Features
+## Requirements
 
-- **Document Management:** Upload, organize, rename, and delete documents
-- **Version Control:** Full version history for every document with download support
-- **Team Collaboration:** Create teams and invite members by email
-- **Role-Based Access Control:**
-  - **Admin:** Full access — manage members, upload, edit, and delete
-  - **Editor:** Upload new versions and edit document metadata
-  - **Viewer:** Read-only access to documents
+- **Arch Linux** (primary target, works on any Linux)
+- **NVIDIA GPU** with 5+ GB VRAM (RTX 3060+ recommended)
+- **Python 3.11+**
+- **Node.js 20+**
+- **Ollama** (for local AI inference)
+- **Tailscale** (for phone access)
 
-## Setup
-
-### 1. Install dependencies
+## Quick Start
 
 ```bash
+# 1. Clone and enter the repo
+git clone <this-repo>
+cd prius-price-tracker
+
+# 2. Run the setup script
+./scripts/setup.sh
+
+# 3. Start all services
+./scripts/start.sh
+
+# 4. (Optional) Expose to phone via Tailscale
+./scripts/tailscale-serve.sh
+```
+
+## Manual Setup
+
+### Install Ollama and pull the model
+
+```bash
+# Arch Linux
+sudo pacman -S ollama
+
+# Pull the vision model (~6GB download)
+ollama pull qwen2.5vl:7b
+```
+
+### Backend
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Initialize the database
+python -c "from backend.database import init_db; init_db()"
+
+# Start the server
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Frontend
+
+```bash
+cd frontend
 npm install
+npm run dev -- --host 0.0.0.0
 ```
 
-### 2. Set up Clerk
-
-1. Create a [Clerk](https://clerk.com) application
-2. Copy your **Publishable Key** and **Secret Key** from the Clerk dashboard
-3. Create a JWT template for Convex:
-   - Go to **JWT Templates** in Clerk dashboard
-   - Create a new template named "convex"
-   - Set the **Issuer** to your Clerk Frontend API URL
-   - Set the **Audience** to `convex`
-
-### 3. Set up Convex
+### Tailscale (phone access)
 
 ```bash
-npx convex dev
+# Make sure Tailscale is running and authenticated
+sudo systemctl start tailscaled
+sudo tailscale up
+
+# Expose the frontend
+tailscale serve --bg 5173
+
+# Access from phone at: https://your-machine.tailXXXXX.ts.net
 ```
 
-This will prompt you to log in and create a new project. It generates the `convex/_generated/` directory.
+## Usage
 
-### 4. Configure environment variables
+### From Desktop
 
-Fill in `.env.local` with your values:
+Open `http://localhost:5173` in your browser. The API docs are at `http://localhost:8000/docs`.
 
+### From Phone
+
+1. Connect to your Tailscale VPN
+2. Navigate to `https://your-machine-name.your-tailnet.ts.net`
+3. Tap "Capture Screen" to trigger a capture on your desktop
+
+### Hotkey
+
+Default: `Super+Shift+P` — triggers capture without needing the web UI.
+
+Configure in `.env`:
 ```
-NEXT_PUBLIC_CONVEX_URL=<from npx convex dev output>
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<from Clerk dashboard>
-CLERK_SECRET_KEY=<from Clerk dashboard>
-```
-
-Set these in the **Convex dashboard** (Settings > Environment Variables):
-
-```
-CLERK_JWT_ISSUER_DOMAIN=<your Clerk Frontend API URL, e.g. https://your-app.clerk.accounts.dev>
-CLERK_WEBHOOK_SECRET=<from Clerk webhook setup>
-```
-
-### 5. Set up Resend (invite emails)
-
-1. Create a [Resend](https://resend.com) account (free tier: 100 emails/day)
-2. Go to **API Keys** in the Resend dashboard and create a new key
-3. Add the key to `.env.local`:
-
-```
-RESEND_API_KEY=<from Resend dashboard>
+PRIUS_CAPTURE_HOTKEY=<super>+<shift>+p
 ```
 
-4. Also set it in the **Convex dashboard** (Settings > Environment Variables):
+## Configuration
 
+Create a `.env` file in the `backend/` directory:
+
+```env
+# Vision model (default: Ollama local)
+PRIUS_EXTRACTION_BACKEND=ollama
+PRIUS_OLLAMA_BASE_URL=http://localhost:11434
+PRIUS_OLLAMA_MODEL=qwen2.5vl:7b
+
+# Optional: OpenAI fallback
+PRIUS_OPENAI_API_KEY=sk-...
+PRIUS_OPENAI_MODEL=gpt-4o
+
+# Capture settings
+PRIUS_CAPTURE_HOTKEY=<super>+<shift>+p
+PRIUS_CAPTURE_MONITOR=0
+
+# Debug
+PRIUS_DEBUG=true
 ```
-RESEND_API_KEY=<from Resend dashboard>
-```
 
-> **Note:** The Convex environment variable is required — Convex actions run server-side and read env vars from the deployment, not from `.env.local`.
+## Evaluation
 
-Optionally, you can also set these in the Convex dashboard to customize the sender and links in invite emails:
-
-```
-RESEND_FROM_EMAIL=DocVault <you@yourdomain.com>
-APP_URL=https://your-production-url.com
-```
-
-### 6. Set up Clerk webhook
-
-1. In Clerk dashboard, go to **Webhooks**
-2. Create an endpoint pointing to: `<your-convex-deployment-url>/clerk-webhook`
-3. Subscribe to events: `user.created`, `user.updated`, `user.deleted`
-4. Copy the **Signing Secret** and set it as `CLERK_WEBHOOK_SECRET` in Convex environment variables
-
-### 7. Run the app
-
-In two separate terminals:
+Test extraction accuracy against annotated ground truth:
 
 ```bash
-npm run dev          # Next.js frontend
-npm run dev:convex   # Convex backend
+# Add screenshots + JSON pairs to backend/evals/ground_truth/
+# Then run:
+./scripts/run_eval.sh ollama
+./scripts/run_eval.sh openai  # compare models
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+See `backend/evals/ground_truth/README.md` for the annotation format.
 
 ## Project Structure
 
 ```
-convex/                    # Convex backend
-  schema.ts                # Database schema
-  auth.config.ts           # Clerk auth configuration
-  users.ts                 # User sync from Clerk
-  teams.ts                 # Team CRUD + member management
-  documents.ts             # Document CRUD
-  documentVersions.ts      # Version control + file storage
-  http.ts                  # Webhook endpoint
-  lib/permissions.ts       # RBAC helpers
-
-src/app/                   # Next.js pages
-  page.tsx                 # Landing page
-  dashboard/               # User dashboard
-  teams/new/               # Create team
-  teams/[teamId]/          # Team documents
-  teams/[teamId]/settings/ # Team member management
-  documents/[documentId]/  # Document detail + version history
-  sign-in/, sign-up/       # Auth pages
-
-src/components/            # React components
-  providers.tsx            # Convex + Clerk providers
-  navbar.tsx               # Navigation bar
-  team-card.tsx            # Team card for dashboard
-  document-table.tsx       # Documents list with actions
-  upload-dialog.tsx        # File upload modal
-  version-history.tsx      # Version timeline
-  member-manager.tsx       # Team member management
-  role-badge.tsx           # Role display badge
+├── backend/
+│   ├── main.py              # FastAPI application
+│   ├── config.py            # Settings (env vars)
+│   ├── database.py          # SQLite + SQLModel
+│   ├── models.py            # Database models
+│   ├── capture/             # Screen capture (mss + hotkey)
+│   ├── extraction/          # AI extraction (Ollama / OpenAI)
+│   ├── routers/             # API endpoints
+│   └── evals/               # Evaluation framework
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx          # Main app
+│   │   ├── api/client.ts    # API client
+│   │   └── components/      # React components
+│   └── package.json
+├── scripts/
+│   ├── setup.sh             # One-time setup
+│   ├── start.sh             # Start all services
+│   ├── tailscale-serve.sh   # Phone access setup
+│   └── run_eval.sh          # Run evaluations
+├── PLAN.md                  # Detailed project plan
+└── README.md                # This file
 ```
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/health | Health check |
+| GET | /api/listings | List all listings (with filters) |
+| GET | /api/listings/{id} | Get single listing |
+| POST | /api/listings | Add a listing manually |
+| DELETE | /api/listings/{id} | Remove a listing |
+| POST | /api/capture | Trigger screen capture |
+| POST | /api/capture/batch | Multi-capture with delay |
+| GET | /api/capture/status | Current capture status |
+| GET | /api/stats | Aggregate statistics |
+| GET | /api/stats/deals | Best deals ranked |
+
+## Tech Stack
+
+- **Backend:** FastAPI, SQLite, SQLModel, mss, pynput
+- **Frontend:** React, Vite, Tailwind CSS, Recharts
+- **AI:** Qwen2.5-VL-7B via Ollama (local, free)
+- **Networking:** Tailscale Serve
+
+## Cost
+
+**$0** — everything runs locally with open-source tools.
